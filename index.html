@@ -60,32 +60,35 @@
     });
     var app = {};
 
-    var datas = [];
     draw(); //获取后端传来的json对象并绘图
+    var xxarea=[];
+    var yyarea=[];
+
     function draw() {
         $.ajax({
             type: "post",
             async: true, //异步请求(默认也是异步)
-            url: "test", //请求发送到后台controller的地址
+            url: "${pageContext.request.contextPath}/ajaxrequest/getCoordinate.action", //请求发送到后台controller的地址
             dataType: "json", //返回数据形式为json
-            success: function (results) { //result参数是服务器返回的json对象，这个参数是自带的，名字随便起
+            success: function (results) { //result参数是服务器返回的json对象，这个参数是自带的
                 if (results != null) {
-                    datas.push(results["datas"]) //取出Json对象中的值，作为绘图时的data
+                    results=eval(results);
+                    yyarea.push(results.y) //取出Json对象中的值，作为绘图时的data
+                    xxarea.push(results.x)
 
                     var option;
 
                     option = {
                         xAxis: {
                             type: 'category',
-                            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+                            data: xxarea
                         },
                         yAxis: {
                             type: 'value'
                         },
                         series: [
                             {
-                                /*data: [150, 230, 224, 218, 135, 10, 260],*/
-                                data: datas,
+                                data: yyarea,
                                 type: 'line'
                             }
                         ]
@@ -128,17 +131,28 @@
 
     var option;
 
+
+    var xarea=[];
+    var yarea=[];
+
+
+    xarea=[1,2,3,4,5,6,7,8,9,8,7,6,5];
+
+
+    yarea=[120, 200, 150, 80, 70, 110, 130,8,9,8,7,6,5];
+
+
     option = {
         xAxis: {
             type: 'category',
-            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+            data: xarea
         },
         yAxis: {
             type: 'value'
         },
         series: [
             {
-                data: [120, 200, 150, 80, 70, 110, 130],
+                data: yarea,
                 type: 'bar',
                 showBackground: true,
                 backgroundStyle: {
