@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="styleSheet" type="text/css" href="indexcss.css" >
+
+</head>
+
+<script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.1/dist/echarts.min.js"></script>
+
+<body>
+<div id="total">
+    <div class="line">
+        <button id="btn1">查看折线图</button>
+    </div>
+
+    <div class="bar">
+        <button id="btn2">查看柱状图</button>
+    </div>
+</div>
+
+<div id="container" style="height: 350px;width: 500px"></div>
+
+<div id="container1" style="height: 350px;width: 500px"></div>
+
+<div id="tableDiv">
+    <table id="tableTable"></table>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#container").hide();
+        $("#container1").hide();
+    });
+
+    $(document).ready(function(){
+        $("#btn1").click(function(){
+
+            $("#container").show();
+            $("#container1").hide();
+        });
+    });
+
+    var myChartline = echarts.init(document.getElementById('container'), null, {
+        renderer: 'canvas',
+        useDirtyRect: false
+    });
+
+    //获取后端传来的json对象并绘图
+    var xxarea=[];
+    var yyarea=[];
+    var optionline;
+
+    function draw() {
+        $.ajax({
+            type: "post",
+            async: true, //异步请求(默认也是异步)
+            url: "http://localhost:8080/ajaxrequest/getCoordinate.action", //请求发送到后台controller的地址
+            dataType: "json", //返回数据形式为json
+            success: function (results) { //result参数是服务器返回的json对象，这个参数是自带的
+                if (results != null) {
+                    results=eval(results);
+                    yyarea=results.y //取出Json对象中的值，作为绘图时的data
+                    xxarea=results.x
+
+                    optionline = {
+                        xAxis: {
+                            type: 'category',
+                            data: xxarea
+                        },
+                        yAxis: {
+                            type: 'value'
+                        },
+                        series: [
+                            {
+                                data: yyarea,
+                                type: 'line'
+                            }
+                        ]
+                    };
+                    myChartline.setOption(optionline);
+                    window.addEventListener('resize', myChartline.resize);
+                }
+            }/*,
+            error: function (errorMsg) {
+                //请求失败时执行该函数
+                alert("图表请求数据失败!");
+            } */
+        })
+    }
+    draw();
+
+    $(document).ready(function(){
+        $("#btn2").click(function(){
+
+            $("#container1").show();
+            $("#container").hide();
+        });
+    });
+
+    var myChartbar = echarts.init(document.getElementById('container1'), null, {
+        renderer: 'canvas',
+        useDirtyRect: false
+    });
+
+    var optionbar;
+    var xarea=[];
+    var yarea=[];
+
+    function draws() {
+        $.ajax({
+            type: "post",
+            async: true, //异步请求(默认也是异步)
+            url: "http://localhost:8080/ajaxrequest/getCoordinate.action", //请求发送到后台controller的地址
+            dataType: "json", //返回数据形式为json
+            success: function (results) { //result参数是服务器返回的json对象，这个参数是自带的
+                if (results != null) {
+                    results=eval(results);
+                    yarea=results.y //取出Json对象中的值，作为绘图时的data
+                    xarea=results.x
+
+                    optionbar = {
+                        xAxis: {
+                            type: 'category',
+                            data: xarea
+                        },
+                        yAxis: {
+                            type: 'value'
+                        },
+                        series: [
+                            {
+                                data: yarea,
+                                type: 'bar',
+                                showBackground: true,
+                                backgroundStyle: {
+                                    color: 'rgba(180, 180, 180, 0.2)'
+                                }
+                            }
+                        ]
+                    };
+                    myChartbar.setOption(optionbar);
+                    window.addEventListener('resize', myChartbar.resize);
+                }
+            }/*,
+            error: function (errorMsg) {
+                //请求失败时执行该函数
+                alert("图表请求数据失败!");
+            }*/
+        })
+    }
+    draws();
+
+
+</script>
+
+<script type="text/javascript">
+
+    var xTable=[];
+    var yTable=[];
+    var idTable=[];
+    var rows = [];
+    var str ='';
+
+    function list() {
+        $.ajax({
+            type: "post",
+            async: true, //异步请求(默认也是异步)
+            url: "http://localhost:8080/ajaxrequest/getCoordinate.action", //请求发送到后台controller的地址
+            dataType: "json", //返回数据形式为json
+            success: function (results) { //result参数是服务器返回的json对象，这个参数是自带的
+                if (results != null) {
+                    results=eval(results);
+                    yTable=results.y //取出Json对象中的值，作为绘图时的data
+                    idTable=results.id
+                    xTable=results.x
+
+                    //yTable=[1,2,3,4]
+                    //xTable=[1,2,3,4]
+                    // idTable=[22,3,2,5]
+                    // rows=[]
+
+                    var i = 0
+
+                    for (i = 0; i < idTable.length; i++) {
+                        str = '<tr><td><div><input type="checkbox" name="delBot" '+'id="'+idTable[i]+'"' +'value="'+idTable[i]+'"' +'></div>' + '</td><td>'+ idTable[i] + '</td><td>' + xTable[i] + '</td><td>' + yTable[i] + '</td></tr>';
+                        rows.push(str);
+
+                    }
+                    document.getElementById("tableTable").innerHTML = "";
+                    document.getElementById("tableTable").innerHTML = '<thead><tr><th>#</th><th>ID</th><th>X</th><th>Y</th></tr></thead><tbody>'
+                        + rows.join("") + '</tbody>';
+                    //alert();
+                }
+
+            },
+            error: function (errorMsg) {
+                //请求失败时执行该函数
+                alert("01false!");
+            }
+        })
+    }
+    list();
+
+
+</script>
+
+</body>
+</html>
