@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>login</title>
+    <link rel="styleSheet" type="text/css" href="indexcss.css" >
+</head>
+
+<script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.1/dist/echarts.min.js"></script>
+
+
+<body>
+
+    <div class="login">
+        <form class="loginForm" >
+            <div class="inputbox1">
+                <label for="user">用户名：</label>
+                <input id="user" type="text" name="username" placeholder="请输入用户名" required/>
+            </div>
+            <div class="inputbox2">
+                <label for="pwd">密码：</label>
+                <input id="pwd" type="password" name="password" placeholder="请输入密码" required/>
+            </div>
+            <div class="subBtn">
+                <input id="btnLogin" type="submit" value="登录" />
+                <input id="resetLogin"  type="reset" value="重置"/>
+            </div>
+        </form>
+    </div>
+
+    <script type="text/javascript">
+        $(function() {
+            $("#btnlogin").click(function() {
+                //var list = [];
+                //var data = {};
+                var username=$("#username").val();
+                var password=$("#password").val();
+                //list.push(data);
+                $.ajax(
+                    {
+                        url:"http://localhost:8080/ajaxrequest/login.action",
+                        type:"post",
+                        data : {"username":username , "password":password},
+                        dataType:"json",
+                        success: function(data){
+                            alert("传输成功");
+                        },
+                        error : function (errorMsg){
+                            alert("传输失败");
+                        }
+                    })
+            })
+        })
+
+
+
+
+    </script>
+
+
+
+</body>
+</html>

@@ -21,29 +21,106 @@
     </div>
 </div>
 
+<div id="container" style="height: 350px;width: 500px"></div>
 
-<div id="container" style="height: 430px;width: 500px"></div>
+<div id="container1" style="height: 350px;width: 500px"></div>
 
-<div id="container1" style="height: 430px;width: 500px"></div>
+<div id="tableDiv">
+    <table id="tableTable"></table>
+</div>
 
-<script>
-    $(document).ready(function(){
-        if($("#container").css("display")=="none"){
-            $("#container").show();
-        }else{
-            $("#container").hide();
-        }
-        if($("#container1").css("display")=="none"){
-            $("#container1").show();
-        }else{
-            $("#container1").hide();
-        }
+<div id="totalOption">
+    <div class="addd">
+        <button id="btnA">新增数据</button>
+    </div>
 
-    });
-</script>
+    <div class="upda">
+        <button id="btnU">修改数据</button>
+    </div>
+
+    <div class="dele">
+        <button id="btnD">删除数据</button>
+    </div>
+
+    <div class="sear">
+        <button id="btnS">查询数据</button>
+    </div>
+</div>
+
+<div id="add">
+    <form class="addForm"  action="http://localhost:8080/ajaxrequest/addTableData.action">
+        <div class="addInputBox">
+            <p>数据新增界面</p>
+            <label for="addDataX">X轴数据：</label>
+            <input id="addDataX" type="text" name="addDataX" placeholder="请输入X轴数据" required/>
+            <label for="addDataY">Y轴数据：</label>
+            <input id="addDataY" type="text" name="addDataY" placeholder="请输入Y轴数据" required/>
+        </div>
+        <div class="addSubBtn">
+            <input id="btnAdd" type="submit" value="提交" />
+            <input id="resetAdd" type="reset" value="重置"/>
+        </div>
+    </form>
+</div>
+
+<div id="update">
+    <form class="addForm" action="http://localhost:8080/ajaxrequest/updateTableData.action">
+        <div class="addInputBox">
+            <p>数据修改界面</p>
+            <label for="updateDataId">数据ID：</label>
+            <input id="updateDataId" type="text" name="updateDataId" placeholder="请输入数据ID" required/>
+            <label for="updateDataX">X轴数据：</label>
+            <input id="updateDataX" type="text" name="updateDataX" placeholder="请输入X轴数据" required/>
+            <label for="updateDataY">Y轴数据：</label>
+            <input id="updateDataY" type="text" name="updateDataY" placeholder="请输入Y轴数据" required/>
+        </div>
+        <div class="addSubBtn">
+            <input id="btnUpdate" type="submit" value="提交" />
+            <input id="resetUpdate" type="reset" value="重置"/>
+        </div>
+    </form>
+
+</div>
+
+<div id="delete">
+    <form class="deleteForm" >
+        <div class="deleteInputBox">
+            <p>数据删除界面</p>
+        </div>
+        <div class="deleteSubBtn">
+            <input id="btnDelete" type="submit" value="删除" />
+        </div>
+    </form>
+</div>
+
+<div id="search">
+    <form class="searchForm" action="http://localhost:8080/ajaxrequest/searchTableData.action">
+        <div class="searchInputBox">
+            <p>数据查询界面</p>
+            <label for="searchDataId">数据ID：</label>
+            <input id="searchDataId" type="text" name="searchDataId" placeholder="请输入数据ID" />
+            <label for="searchDataX">X轴数据：</label>
+            <input id="searchDataX" type="text" name="searchDataX" placeholder="请输入X轴数据" />
+            <label for="searchDataY">Y轴数据：</label>
+            <input id="searchDataY" type="text" name="searchDataY" placeholder="请输入Y轴数据" />
+        </div>
+        <div class="addSubBtn">
+            <input id="btnSearch" type="submit" value="查询" />
+            <input id="resetSearch" type="reset" value="重置"/>
+        </div>
+    </form>
+</div>
 
 
 <script type="text/javascript">
+    $(document).ready(function(){
+            $("#container").hide();
+            $("#container1").hide();
+            $("#add").hide();
+            $("#update").hide();
+            $("#delete").hide();
+            $("#search").hide();
+    });
 
     $(document).ready(function(){
         $("#btn1").click(function(){
@@ -53,32 +130,29 @@
         });
     });
 
-    var dom = document.getElementById('container');
-    var myChart = echarts.init(dom, null, {
+    var myChartline = echarts.init(document.getElementById('container'), null, {
         renderer: 'canvas',
         useDirtyRect: false
     });
-    var app = {};
 
-    draw(); //获取后端传来的json对象并绘图
+    //获取后端传来的json对象并绘图
     var xxarea=[];
     var yyarea=[];
+    var optionline;
 
     function draw() {
         $.ajax({
             type: "post",
             async: true, //异步请求(默认也是异步)
-            url: "${pageContext.request.contextPath}/ajaxrequest/getCoordinate.action", //请求发送到后台controller的地址
+            url: "http://localhost:8080/ajaxrequest/getCoordinate.action", //请求发送到后台controller的地址
             dataType: "json", //返回数据形式为json
             success: function (results) { //result参数是服务器返回的json对象，这个参数是自带的
                 if (results != null) {
                     results=eval(results);
-                    yyarea.push(results.y) //取出Json对象中的值，作为绘图时的data
-                    xxarea.push(results.x)
+                    yyarea=results.y //取出Json对象中的值，作为绘图时的data
+                    xxarea=results.x
 
-                    var option;
-
-                    option = {
+                    optionline = {
                         xAxis: {
                             type: 'category',
                             data: xxarea
@@ -93,24 +167,17 @@
                             }
                         ]
                     };
-
-                    if (option && typeof option === 'object') {
-                        myChart.setOption(option);
-                    }
-
-                    window.addEventListener('resize', myChart.resize);
+                    myChartline.setOption(optionline);
+                    window.addEventListener('resize', myChartline.resize);
                 }
-            },
+            }/*,
             error: function (errorMsg) {
                 //请求失败时执行该函数
                 alert("图表请求数据失败!");
-            }
+            } */
         })
     }
-
-</script>
-
-<script type="text/javascript">
+    draw();
 
     $(document).ready(function(){
         $("#btn2").click(function(){
@@ -118,55 +185,236 @@
             $("#container1").show();
             $("#container").hide();
         });
-
-
     });
 
-    var dom = document.getElementById('container1');
-    var myChart = echarts.init(dom, null, {
+    var myChartbar = echarts.init(document.getElementById('container1'), null, {
         renderer: 'canvas',
         useDirtyRect: false
     });
-    var app = {};
 
-    var option;
-
-
+    var optionbar;
     var xarea=[];
     var yarea=[];
 
+    function draws() {
+        $.ajax({
+            type: "post",
+            async: true, //异步请求(默认也是异步)
+            url: "http://localhost:8080/ajaxrequest/getCoordinate.action", //请求发送到后台controller的地址
+            dataType: "json", //返回数据形式为json
+            success: function (results) { //result参数是服务器返回的json对象，这个参数是自带的
+                if (results != null) {
+                    results=eval(results);
+                    yarea=results.y //取出Json对象中的值，作为绘图时的data
+                    xarea=results.x
 
-    xarea=[1,2,3,4,5,6,7,8,9,8,7,6,5];
-
-
-    yarea=[120, 200, 150, 80, 70, 110, 130,8,9,8,7,6,5];
-
-
-    option = {
-        xAxis: {
-            type: 'category',
-            data: xarea
-        },
-        yAxis: {
-            type: 'value'
-        },
-        series: [
-            {
-                data: yarea,
-                type: 'bar',
-                showBackground: true,
-                backgroundStyle: {
-                    color: 'rgba(180, 180, 180, 0.2)'
+                    optionbar = {
+                        xAxis: {
+                            type: 'category',
+                            data: xarea
+                        },
+                        yAxis: {
+                            type: 'value'
+                        },
+                        series: [
+                            {
+                                data: yarea,
+                                type: 'bar',
+                                showBackground: true,
+                                backgroundStyle: {
+                                    color: 'rgba(180, 180, 180, 0.2)'
+                                }
+                            }
+                        ]
+                    };
+                    myChartbar.setOption(optionbar);
+                    window.addEventListener('resize', myChartbar.resize);
                 }
-            }
-        ]
-    };
-
-    if (option && typeof option === 'object') {
-        myChart.setOption(option);
+            }/*,
+            error: function (errorMsg) {
+                //请求失败时执行该函数
+                alert("图表请求数据失败!");
+            }*/
+        })
     }
+    draws();
 
-    window.addEventListener('resize', myChart.resize);
+
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#btnA").click(function(){
+
+            $("#add").show();
+            $("#update").hide();
+            $("#delete").hide();
+            $("#search").hide();
+        });
+        $("#btnU").click(function(){
+
+            $("#update").show();
+            $("#add").hide();
+            $("#delete").hide();
+            $("#search").hide();
+        });
+        $("#btnD").click(function(){
+
+            $("#delete").show();
+            $("#add").hide();
+            $("#update").hide();
+            $("#search").hide();
+        });
+        $("#btnS").click(function(){
+
+            $("#search").show();
+            $("#add").hide();
+            $("#update").hide();
+            $("#delete").hide();
+        });
+
+    });
+
+    var xTable=[];
+    var yTable=[];
+    var idTable=[];
+    var rows = [];
+    var str ='';
+
+    function list() {
+        $.ajax({
+            type: "post",
+            async: true, //异步请求(默认也是异步)
+            url: "http://localhost:8080/ajaxrequest/getCoordinate.action", //请求发送到后台controller的地址
+            dataType: "json", //返回数据形式为json
+            success: function (results) { //result参数是服务器返回的json对象，这个参数是自带的
+                if (results != null) {
+                    results=eval(results);
+                    yTable=results.y //取出Json对象中的值，作为绘图时的data
+                    idTable=results.id
+                    xTable=results.x
+
+                    //yTable=[1,2,3,4]
+                   //xTable=[1,2,3,4]
+                   // idTable=[22,3,2,5]
+                   // rows=[]
+
+                    var i = 0
+
+                    for (i = 0; i < idTable.length; i++) {
+                        str = '<tr><td><div><input type="checkbox" name="delBot" '+'id="'+idTable[i]+'"' +'value="'+idTable[i]+'"' +'></div>' + '</td><td>'+ idTable[i] + '</td><td>' + xTable[i] + '</td><td>' + yTable[i] + '</td></tr>';
+                        rows.push(str);
+
+                    }
+                    document.getElementById("tableTable").innerHTML = "";
+                    document.getElementById("tableTable").innerHTML = '<thead><tr><th>#</th><th>ID</th><th>X</th><th>Y</th></tr></thead><tbody>'
+                        + rows.join("") + '</tbody>';
+                    //alert();
+                }
+
+            },
+            error: function (errorMsg) {
+                //请求失败时执行该函数
+                alert("01false!");
+            }
+        })
+    }
+    list();
+
+    $(document).ready(function(){
+        $("#btnAdd").click(function(){
+
+        list();
+        });
+    });
+
+    $(document).ready(function(){
+        $("#btnUpdate").click(function(){
+
+            list();
+        });
+    });
+    var del=[]
+    $(document).ready(function(){
+        $("#btnDelete").click(function(){
+            function deleteObj() {
+                var iDel = 0;
+                var jDel = 0;
+
+                var str = document.getElementsByName('delBot');
+                var strstrLen = str.length;
+                var checkVal = '';
+
+                for (iDel = 0, jDel = 0; iDel < strstrLen; iDel++) {
+                    if (str[iDel].checked == true) {
+                        checkVal += str[iDel].value + ',';
+                        del[jDel] = str[iDel].value;
+                        jDel++;
+                    }
+                }
+                if (checkVal == '') {
+                    alert("请先选择复选框！");
+                } else {
+                    alert(del);
+                }
+                $.ajax({
+                    url: "http://localhost:8080/ajaxrequest/deleteTableData.action",
+                    type: "post",
+                    async : false,
+                    data: {
+                        del
+                    },
+                    dataType: "JSON",
+                    success: function(data) {
+                        // 数据传递成功之后做的事
+                    },
+                    error: function(errorMsg) {
+                        alert("02false!"); // 打印错误信息
+                    }
+                });
+            }
+            deleteObj();
+            list();
+        });
+    });
+
+    var ySTable=[];
+    var xSTable=[];
+    var idSTable=[];
+    var rowsSearch=[];
+    $(document).ready(function(){
+        $("#btnSearch").click(function(){
+              $.ajax({
+                  type: "post",
+                  async: true, //异步请求(默认也是异步)
+                  url: "http://localhost:8080/ajaxrequest/searchTableData.action", //请求发送到后台controller的地址
+                  dataType: "json", //返回数据形式为json
+                  success: function (results) { //result参数是服务器返回的json对象，这个参数是自带的
+                      if (results != null) {
+                          results = eval(results);
+                          ySTable=results.y //取出Json对象中的值，作为绘图时的data
+                          xSTable=results.x
+                          idSTable=results.id
+
+                          var iSea=0;
+
+                          for (iSea = 0; iSea < ySTable.length; iSea++) {
+                              var strs = '<tr><td><div><input type="checkbox" name="delBot" '+'id="'+idSTable[iSea]+'"' +'value="'+idSTable[iSea]+'"' +'></div>' + '</td><td>'+ idSTable[iSea] + '</td><td>' + xSTable[iSea] + '</td><td>' + ySTable[iSea] + '</td></tr>';
+                              rowsSearch.push(strs);
+                          }
+                          document.getElementById("tableTable").innerHTML = '<thead><tr><th>#</th><th>ID</th><th>X</th><th>Y</th></tr></thead><tbody>'
+                              + rowsSearch.join("") + '</tbody>';
+                      }
+
+                  },
+                  error: function (errorMsg) {
+                      alert("03false!");
+                  }
+              })
+
+        });
+    });
+
 </script>
 
 </body>
